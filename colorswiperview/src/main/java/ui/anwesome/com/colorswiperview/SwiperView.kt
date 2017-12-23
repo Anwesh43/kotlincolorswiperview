@@ -6,6 +6,7 @@ package ui.anwesome.com.colorswiperview
 import android.content.*
 import android.graphics.*
 import android.view.*
+val colors:Array<String> = arrayOf("#f44336","#9C27B0","#009688","#BF360C","#C51162")
 class SwiperView(ctx:Context):View(ctx) {
     val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     override fun onDraw(canvas:Canvas) {
@@ -51,6 +52,21 @@ class SwiperView(ctx:Context):View(ctx) {
         }
         fun executeFn(cb:(Float,Float,Int)->Unit) {
             cb(scale,dirf,dir)
+        }
+    }
+    data class ColorBoxScreen(var i:Int) {
+        fun drawOnScreen(canvas: Canvas,paint:Paint,w:Float,h:Float) {
+            val x = w*i
+            paint.color = Color.parseColor(colors[i])
+            canvas.drawRect(RectF(x,0f,x+w,h),paint)
+        }
+        fun drawOnLeft(canvas: Canvas,paint:Paint,w:Float,h:Float,size:Float) {
+            paint.color = Color.parseColor(colors[i])
+            canvas.drawRoundRect(RectF(w-size,h-size,w,h),size/10,size/10,paint)
+        }
+        fun drawOnRight(canvas: Canvas,paint:Paint,w:Float,h:Float,size:Float) {
+            paint.color = Color.parseColor(colors[i])
+            canvas.drawRoundRect(RectF(0f,h-size,size,h),size/10,size/10,paint)
         }
     }
 }

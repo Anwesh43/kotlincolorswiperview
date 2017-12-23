@@ -121,6 +121,22 @@ class SwiperView(ctx:Context):View(ctx) {
             }
         }
     }
+    data class ColorScreenRenderer(var view:SwiperView,var time:Int = 0) {
+        var animator:ColorScreenAnimator?=null
+        fun render(canvas:Canvas,paint:Paint) {
+            if(time == 0) {
+                val w = canvas.width.toFloat()
+                val h = canvas.height.toFloat()
+                animator = ColorScreenAnimator(Screen(w,h),view)
+            }
+            animator?.draw(canvas,paint)
+            animator?.update()
+            time++
+        }
+        fun handleTap(x:Float,y:Float) {
+            animator?.startUpdating(x,y)
+        }
+    }
 }
 fun ConcurrentLinkedQueue<SwiperView.ColorBoxScreen>.getAt(i:Int):SwiperView.ColorBoxScreen? {
     var index = 0

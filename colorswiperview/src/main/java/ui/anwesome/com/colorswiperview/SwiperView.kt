@@ -53,10 +53,18 @@ class SwiperView(ctx:Context):View(ctx) {
             }
             canvas.restore()
             if(j > 0) {
-                colorBoxes.getAt(j-1)?.drawBar(canvas,paint,w,h,w/10,0f,state.scale)
+                var ls = 0f
+                if(state.dir == -1) {
+                    ls = state.scale
+                }
+                colorBoxes.getAt(j-1)?.drawBar(canvas,paint,w,h,w/10,0f,ls)
             }
             if(j < colors.size) {
-                colorBoxes.getAt(j-1)?.drawBar(canvas,paint,w,h,w/10,w-w/10,state.scale)
+                var rs = 0f
+                if(state.dir == 1) {
+                    rs = state.scale
+                }
+                colorBoxes.getAt(j+1)?.drawBar(canvas,paint,w,h,w/10,w-w/10,rs)
             }
         }
         fun startUpdating(dir:Int) {
@@ -101,7 +109,7 @@ class SwiperView(ctx:Context):View(ctx) {
             canvas.drawRoundRect(RectF(x,y,x+size,y+size),size/10,size/10,paint)
             canvas.save()
             paint.color = Color.parseColor("#88EEEEEE")
-            canvas.translate(x+size/2,y+size)
+            canvas.translate(x+size/2,y+size/2)
             canvas.scale(scale,scale)
             canvas.drawRoundRect(RectF(-size/2,-size/2,size/2,size/2),size/10,size/10,paint)
             canvas.restore()

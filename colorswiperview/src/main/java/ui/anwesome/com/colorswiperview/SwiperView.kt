@@ -34,4 +34,20 @@ class SwiperView(ctx:Context):View(ctx) {
 
         }
     }
+    data class State(var dir:Int = 0,var scale:Float = 0f,var dirf:Float = 0f) {
+        fun update() {
+            scale += dirf*0.1f
+            if(scale > 1) {
+                scale = 0f
+                dirf = 0f
+            }
+        }
+        fun startUpdating(dir:Int) {
+            dirf = 1f
+            this.dir = dir
+        }
+        fun executeFn(cb:(Float,Float,Int)->Unit) {
+            cb(scale,dirf,dir)
+        }
+    }
 }

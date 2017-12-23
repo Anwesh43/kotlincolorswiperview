@@ -15,6 +15,7 @@ class SwiperView(ctx:Context):View(ctx) {
         return true
     }
     data class Screen(var w:Float,var h:Float = 0f,var x:Float = 0f,var prevX:Float = 0f,var j:Float = 0f){
+        val state = State()
         fun update(updateDb:(Int)->Unit) {
             val updateFn:(Float,Float,Int)->Unit = { scale,dirf,dir ->
                 x = prevX + dir*scale*w
@@ -24,6 +25,8 @@ class SwiperView(ctx:Context):View(ctx) {
                     j+=dir
                 }
             }
+            state.update()
+            state.executeFn(updateFn)
         }
         fun draw(canvas:Canvas,paint:Paint) {
             canvas.save()
@@ -31,7 +34,7 @@ class SwiperView(ctx:Context):View(ctx) {
             canvas.restore()
         }
         fun startUpdating(dir:Int) {
-
+            state.startUpdating(dir)
         }
     }
     data class State(var dir:Int = 0,var scale:Float = 0f,var dirf:Float = 0f) {

@@ -27,11 +27,16 @@ class SwiperView(ctx:Context):View(ctx) {
     data class Screen(var w:Float,var h:Float = 0f,var x:Float = 0f,var prevX:Float = 0f,var j:Int = 0){
         val colorBoxes:ConcurrentLinkedQueue<ColorBoxScreen> = ConcurrentLinkedQueue()
         val state = State()
+        init {
+            for(i in 0..colors.size -1) {
+                colorBoxes.add(ColorBoxScreen(i))
+            }
+        }
         fun update(updateDb:(Int)->Unit) {
             val updateFn:(Float,Float,Int)->Unit = { scale,dirf,dir ->
-                x = prevX + dir*scale*w
+                x = prevX - dir*scale*w
                 if(dirf == 0f) {
-                    x = prevX+dir*w
+                    x = prevX-dir*w
                     prevX = x
                     updateDb(j)
                     j+=dir
@@ -48,17 +53,17 @@ class SwiperView(ctx:Context):View(ctx) {
             }
             canvas.restore()
             if(j > 0) {
-                colorBoxes.getAt(j-1)?.drawOnLeft(canvas,paint,w,h,w/10)
+                colorBoxes.getAt(j-1)?.drawBar(canvas,paint,w,h,w/10,0f,state.scale)
             }
             if(j < colors.size) {
-                colorBoxes?.getAt(j+1)?.drawOnRight(canvas,paint,w,h,w/10)
+                colorBoxes.getAt(j-1)?.drawBar(canvas,paint,w,h,w/10,w-w/10,state.scale)
             }
         }
         fun startUpdating(dir:Int) {
             state.startUpdating(dir)
         }
         fun handleTap(x:Float,y:Float,startcb:()->Unit) {
-            val conditions:Array<()->Boolean> = arrayOf({j>0},{j< colors.size})
+            val conditions:Array<()->Boolean> = arrayOf({j>0},{j< colors.size-1})
             for(i in 0..1) {
                 if (conditions[i].invoke() && handleTapOnBar(x, y, (w-w/10)*(i))) {
                     startUpdating(i*2-1)
@@ -90,13 +95,16 @@ class SwiperView(ctx:Context):View(ctx) {
             paint.color = Color.parseColor(colors[i])
             canvas.drawRect(RectF(x,0f,x+w,h),paint)
         }
-        fun drawOnRight(canvas: Canvas,paint:Paint,w:Float,h:Float,size:Float) {
+        fun drawBar(canvas: Canvas,paint:Paint,w:Float,h:Float,size:Float,x:Float,scale:Float) {
+            val y = h-size
             paint.color = Color.parseColor(colors[i])
-            canvas.drawRoundRect(RectF(w-size,h-size,w,h),size/10,size/10,paint)
-        }
-        fun drawOnLeft(canvas: Canvas,paint:Paint,w:Float,h:Float,size:Float) {
-            paint.color = Color.parseColor(colors[i])
-            canvas.drawRoundRect(RectF(0f,h-size,size,h),size/10,size/10,paint)
+            canvas.drawRoundRect(RectF(x,y,x+size,y+size),size/10,size/10,paint)
+            canvas.save()
+            paint.color = Color.parseColor("#88EEEEEE")
+            canvas.translate(x+size/2,y+size)
+            canvas.scale(scale,scale)
+            canvas.drawRoundRect(RectF(-size/2,-size/2,size/2,size/2),size/10,size/10,paint)
+            canvas.restore()
         }
     }
     data class ColorScreenAnimator(var screen:Screen,var view:SwiperView) {

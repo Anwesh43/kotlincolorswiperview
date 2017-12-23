@@ -13,16 +13,12 @@ val colors:Array<String> = arrayOf("#f44336","#9C27B0","#009688","#BF360C","#C51
 class SwiperView(ctx:Context):View(ctx) {
     val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     val renderer = ColorScreenRenderer(this)
+    val gestureHandler = GestureDetector(ctx,SwipeDetector(renderer))
     override fun onDraw(canvas:Canvas) {
         renderer.render(canvas,paint)
     }
     override fun onTouchEvent(event:MotionEvent):Boolean {
-        when(event.action) {
-            MotionEvent.ACTION_DOWN -> {
-                renderer.handleTap(event.x,event.y)
-            }
-        }
-        return true
+        return gestureHandler.onTouchEvent(event)
     }
     data class Screen(var w:Float,var h:Float = 0f,var x:Float = 0f,var prevX:Float = 0f,var j:Int = 0){
         val colorBoxes:ConcurrentLinkedQueue<ColorBoxScreen> = ConcurrentLinkedQueue()
@@ -70,14 +66,16 @@ class SwiperView(ctx:Context):View(ctx) {
         fun startUpdating(dir:Int) {
             state.startUpdating(dir)
         }
-        fun handleTap(x:Float,y:Float,startcb:()->Unit) {
+        fun handleTap(x:Float,y:Float,startcb:()->Unit):Boolean {
             val conditions:Array<()->Boolean> = arrayOf({j>0},{j< colors.size-1})
             for(i in 0..1) {
                 if (conditions[i].invoke() && handleTapOnBar(x, y, (w-w/10)*(i))) {
                     startUpdating(i*2-1)
                     startcb()
+                    return true
                 }
             }
+            return false
         }
         fun handleTapOnBar(x:Float,y:Float,a:Float):Boolean = x>=a && x<=a+w/10 && y>=h-w/10 && y<=h
     }
@@ -131,17 +129,25 @@ class SwiperView(ctx:Context):View(ctx) {
                 }
             }
         }
+        fun setSwipeDir(dir:Int) {
+            if(!animated && ((dir == 1 && screen.j < colors.size-1) || (dir == -1 && screen.j > 0))) {
+                screen.startUpdating(dir)
+                animated = true
+                view.postInvalidate()
+            }
+        }
         fun draw(canvas:Canvas,paint:Paint) {
             canvas.drawColor(Color.parseColor("#212121"))
             screen.draw(canvas,paint)
         }
-        fun startUpdating(x:Float,y:Float) {
+        fun startUpdating(x:Float,y:Float):Boolean {
             if(!animated) {
-                screen.handleTap(x,y,{
+                return screen.handleTap(x,y,{
                     animated = true
                     view.postInvalidate()
                 })
             }
+            return false
         }
     }
     data class ColorScreenRenderer(var view:SwiperView,var time:Int = 0) {
@@ -156,8 +162,11 @@ class SwiperView(ctx:Context):View(ctx) {
             animator?.update()
             time++
         }
-        fun handleTap(x:Float,y:Float) {
-            animator?.startUpdating(x,y)
+        fun setSwipeDir(dir:Int) {
+            animator?.setSwipeDir(dir)
+        }
+        fun handleTap(x:Float,y:Float):Boolean {
+            return animator?.startUpdating(x,y)?:false
         }
     }
     companion object {
@@ -166,6 +175,32 @@ class SwiperView(ctx:Context):View(ctx) {
             activity.setContentView(view)
             return view
         }
+    }
+     data class SwipeDetector(var renderer:ColorScreenRenderer):GestureDetector.SimpleOnGestureListener() {
+         var dir = 0
+         override fun onDown(event: MotionEvent):Boolean {
+             dir = 1
+             if(renderer.handleTap(event.x,event.y)) {
+                 dir = 0
+             }
+             return true
+         }
+         override fun onSingleTapUp(event: MotionEvent):Boolean {
+             return true
+         }
+
+         override fun onFling(e1: MotionEvent?, e2: MotionEvent?, velocityX: Float, velocityY: Float): Boolean {
+             if(Math.abs(velocityX) > Math.abs(velocityY) && dir == 1) {
+                 if(velocityX>0) {
+                     renderer.setSwipeDir(-1)
+                 }
+                 else {
+                     renderer.setSwipeDir(1)
+                 }
+             }
+             return true
+         }
+
     }
 }
 fun ConcurrentLinkedQueue<SwiperView.ColorBoxScreen>.getAt(i:Int):SwiperView.ColorBoxScreen? {

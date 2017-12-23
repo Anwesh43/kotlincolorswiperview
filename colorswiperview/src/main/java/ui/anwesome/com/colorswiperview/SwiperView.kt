@@ -6,6 +6,8 @@ package ui.anwesome.com.colorswiperview
 import android.content.*
 import android.graphics.*
 import android.view.*
+import java.util.concurrent.ConcurrentLinkedQueue
+
 val colors:Array<String> = arrayOf("#f44336","#9C27B0","#009688","#BF360C","#C51162")
 class SwiperView(ctx:Context):View(ctx) {
     val paint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -69,4 +71,14 @@ class SwiperView(ctx:Context):View(ctx) {
             canvas.drawRoundRect(RectF(0f,h-size,size,h),size/10,size/10,paint)
         }
     }
+}
+fun ConcurrentLinkedQueue<SwiperView.ColorBoxScreen>.getAt(i:Int):SwiperView.ColorBoxScreen? {
+    var index = 0
+    this.forEach { it ->
+        if(i == index) {
+            return it
+        }
+        index++
+    }
+    return null
 }

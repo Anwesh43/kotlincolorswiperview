@@ -92,6 +92,35 @@ class SwiperView(ctx:Context):View(ctx) {
             canvas.drawRoundRect(RectF(0f,h-size,size,h),size/10,size/10,paint)
         }
     }
+    data class ColorScreenAnimator(var screen:Screen,var view:SwiperView) {
+        var animated = false
+        fun update() {
+            if(animated) {
+                screen.update { j ->
+                    animated = false
+                }
+                try {
+                    Thread.sleep(50)
+                    view.invalidate()
+                }
+                catch(ex:Exception) {
+
+                }
+            }
+        }
+        fun draw(canvas:Canvas,paint:Paint) {
+            canvas.drawColor(Color.parseColor("#212121"))
+            screen.draw(canvas,paint)
+        }
+        fun startUpdating(x:Float,y:Float) {
+            if(!animated) {
+                screen.handleTap(x,y,{
+                    animated = true
+                    view.postInvalidate()
+                })
+            }
+        }
+    }
 }
 fun ConcurrentLinkedQueue<SwiperView.ColorBoxScreen>.getAt(i:Int):SwiperView.ColorBoxScreen? {
     var index = 0

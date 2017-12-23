@@ -5,7 +5,9 @@ package ui.anwesome.com.colorswiperview
  */
 import android.app.Activity
 import android.content.*
+import android.content.pm.ActivityInfo
 import android.graphics.*
+import android.support.v7.app.AppCompatActivity
 import android.view.*
 import java.util.concurrent.ConcurrentLinkedQueue
 
@@ -172,6 +174,16 @@ class SwiperView(ctx:Context):View(ctx) {
     companion object {
         fun create(activity:Activity):SwiperView {
             val view = SwiperView(activity)
+            activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            activity.window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
+            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+            if(activity is AppCompatActivity) {
+                var appCompatActivity = activity as AppCompatActivity
+                appCompatActivity.supportActionBar?.hide()
+            }
+            else {
+                activity.actionBar?.hide()
+            }
             activity.setContentView(view)
             return view
         }

@@ -3,6 +3,7 @@ package ui.anwesome.com.colorswiperview
 /**
  * Created by anweshmishra on 23/12/17.
  */
+import android.app.Activity
 import android.content.*
 import android.graphics.*
 import android.view.*
@@ -141,6 +142,13 @@ class SwiperView(ctx:Context):View(ctx) {
         }
         fun handleTap(x:Float,y:Float) {
             animator?.startUpdating(x,y)
+        }
+    }
+    companion object {
+        fun create(activity:Activity):SwiperView {
+            val view = SwiperView(activity)
+            activity.setContentView(view)
+            return view
         }
     }
 }

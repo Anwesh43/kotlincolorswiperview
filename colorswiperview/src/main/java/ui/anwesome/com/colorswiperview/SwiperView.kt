@@ -26,6 +26,7 @@ class SwiperView(ctx:Context):View(ctx) {
                 if(dirf == 0f) {
                     x = prevX+dir*w
                     prevX = x
+                    updateDb(j)
                     j+=dir
                 }
             }
@@ -50,8 +51,9 @@ class SwiperView(ctx:Context):View(ctx) {
             state.startUpdating(dir)
         }
         fun handleTap(x:Float,y:Float,startcb:()->Unit) {
+            val conditions:Array<()->Boolean> = arrayOf({j>0},{j< colors.size})
             for(i in 0..1) {
-                if (handleTapOnBar(x, y, (w-w/10)*(i))) {
+                if (conditions[i].invoke() && handleTapOnBar(x, y, (w-w/10)*(i))) {
                     startUpdating(i*2-1)
                     startcb()
                 }

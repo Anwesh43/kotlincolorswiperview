@@ -11,10 +11,16 @@ import java.util.concurrent.ConcurrentLinkedQueue
 val colors:Array<String> = arrayOf("#f44336","#9C27B0","#009688","#BF360C","#C51162")
 class SwiperView(ctx:Context):View(ctx) {
     val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    val renderer = ColorScreenRenderer(this)
     override fun onDraw(canvas:Canvas) {
-
+        renderer.render(canvas,paint)
     }
     override fun onTouchEvent(event:MotionEvent):Boolean {
+        when(event.action) {
+            MotionEvent.ACTION_DOWN -> {
+                renderer.handleTap(event.x,event.y)
+            }
+        }
         return true
     }
     data class Screen(var w:Float,var h:Float = 0f,var x:Float = 0f,var prevX:Float = 0f,var j:Int = 0){

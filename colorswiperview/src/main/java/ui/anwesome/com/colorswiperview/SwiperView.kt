@@ -45,7 +45,7 @@ class SwiperView(ctx:Context):View(ctx) {
             canvas.save()
             canvas.translate(x,0f)
             colorBoxes.forEach {
-                it.drawOnScreen(canvas,paint,w,h)
+                it.drawOnScreen(canvas,paint,w,h-w/10)
             }
             canvas.restore()
             if(j > 0) {
